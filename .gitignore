@@ -1,0 +1,23 @@
+# Local handoff supplied as development context; never publish private sessions.
+/session-handoff-2026-10-19.md
+/handoffs/
+/.local/
+
+# Development dependencies, caches and editor state.
+node_modules/
+coverage/
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Local credentials and logs. Sanitized examples can be explicitly reviewed.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.log
