@@ -1,6 +1,7 @@
 # Local handoff supplied as development context; never publish private sessions.
 /session-handoff-2026-10-19.md
 /handoffs/
+/handoff/
 /.local/
 
 # Development dependencies, caches and editor state.

@@ -11,6 +11,10 @@ language: '{{language}}'
 source_agent: null
 source_workspace: null
 target_workspace: null
+handoff_id: '{{handoff_id}}'
+created_at: '{{created_at}}'
+source_project: '{{source_project}}'
+topic: '{{topic}}'
 ---
 
 # {{title}}

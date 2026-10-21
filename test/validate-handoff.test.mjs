@@ -76,6 +76,8 @@ test('template can be instantiated as valid metadata with a quoted title and Win
   const values = {
     title: "Contributor's example: work", created: '2026-10-19', updated: '2026-10-19',
     status: 'planning', language: 'en', source_workspace: 'D:\\work\\example',
+    handoff_id: 'a1234567-89ab-4cde-8fab-0123456789ab', created_at: '2026-10-19T01:02:03.004Z',
+    source_project: 'example', topic: 'handoff',
   };
   for (const [key, value] of Object.entries(values)) doc.set(key, value);
   for (const key of ['title', 'schema_version', 'created', 'updated', 'source_workspace']) {

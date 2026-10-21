@@ -1,39 +1,91 @@
 # session-handoff
 
-把当前可见会话整理成一份其他项目、会话或 coding agent 能接续的 Markdown 交接文档。每份输出都包含 YAML 元信息，清楚区分事实、建议、失败、上下文缺口和授权边界。
+把当前可见会话整理成其他项目、会话或 coding agent 能接续的 Markdown。每个项目既可发出，也可接收交接；文档包含 YAML 元信息，区分事实、建议、失败、上下文缺口和授权边界。
 
 ## 使用
 
 可直接让 agent 阅读 [SKILL.md](skills/session-handoff/SKILL.md) 并执行：
 
 ```text
-使用 session-handoff，把当前工作交接到 handoffs/export.md。
-重点保留当前状态、未提交改动、失败尝试、下一步与验收方法。
+使用 session-handoff，为当前项目生成一份“分页修复”交接，先不发送。
+保留状态、未提交改动、失败、下一步与验收方法。
 ```
 
-支持已安装技能调用语法的环境可使用 `$session-handoff`。也可以指定“只交接分页子任务，用英文”或“更新已有交接，保留原创建日期”。未指定路径时写入当前项目 `handoffs/session-handoff-YYYY-MM-DD.md`，同名文件默认加后缀避免覆盖。
+支持技能调用语法的环境可使用 `$session-handoff`。也可以说“生成后直接传到 G:\target-project”或“读取当前项目 handoff/incoming 中的分页交接，按我的要求继续”。只生成不触碰目标；只有明确要求传递才投递。
 
-交付包含实际文档链接和可粘贴的启动提示词。只交接当前可见信息，无法访问的旧历史或附件会明确标记；交接文档本身不授予接收方新权限。
+交付实际文档链接及可粘贴的启动提示词；已投递时同时给出收件路径和结果。缺失历史或附件会标记，交接本身不授予新权限。
+
+## 固定目录与命名
+
+```text
+project/
+└── handoff/
+    ├── incoming/    接收与外部导入
+    └── outgoing/    本项目生成、保留的发件快照
+```
+
+新文件统一命名为：
+
+```text
+YYYYMMDDTHHmmssSSSZ__<source>__<topic>__<id8>.md
+20261021T020304005Z__sample-project__分页-修复__a1234567.md
+```
+
+UTC 毫秒时间＋来源项目＋主题＋UUID 前八位。来源和主题支持中文，转小写，空格与下划线转连字符；长度最多 32/48 个 Unicode 字符。传递保留身份与名称。同名同内容幂等成功，不同内容报冲突，不覆盖；已发送文档的修订使用新身份。详见[收发与命名规范](skills/session-handoff/references/routing.md)。
+
+旧 handoffs/ 不会自动搬迁；旧格式仍可校验或通过 receive 显式导入。真实交接建议排除 Git，本仓库已忽略 /handoff/。
+
+## 脚本快速使用
+
+脚本需要 Node.js 22+。在仓库根 npm ci 后，用 PowerShell 执行以下命令（示例项目需替换为已有目录，正文文件需先准备好）：
+
+```powershell
+$scriptDir = (Resolve-Path ./skills/session-handoff/scripts).Path
+$sourceProject = 'G:\example-source'
+$targetProject = 'G:\example-target'
+$bodyFile = 'G:\example-source\.local\handoff-body.md'
+
+# 初始化双向目录；create 和投递也会按需初始化
+node "$scriptDir/init-handoff.mjs" --project "$sourceProject"
+
+# 只生成；body-file 是不含 front matter 的 Markdown 正文
+node "$scriptDir/create-handoff.mjs" --project "$sourceProject" --title '分页修复交接' --topic '分页-修复' --status in-progress --body-file "$bodyFile"
+
+# 生成后立即发送
+node "$scriptDir/create-handoff.mjs" --project "$sourceProject" --title '分页修复交接' --topic '分页-修复' --status in-progress --body-file "$bodyFile" --target "$targetProject" --send
+
+# 稍后发送 create 返回的 file；先预览，可去掉 --dry-run 正式发送
+$outgoingFile = '替换为 create 返回的实际 file 路径'
+node "$scriptDir/send-handoff.mjs" --project "$sourceProject" --file "$outgoingFile" --target "$targetProject" --dry-run
+
+# 导入外部正规文档，查看 incoming
+node "$scriptDir/receive-handoff.mjs" --project "$targetProject" --file 'G:\downloads\external.md'
+node "$scriptDir/list-handoffs.mjs" --project "$targetProject" --direction incoming
+```
+
+init/create/send/receive 支持 --dry-run，不创建目录或文件。完整参数、旧文档导入与失败重试见[脚本说明](skills/session-handoff/references/routing.md#脚本与参数)。脚本仅支持本机或已挂载目录，不内置 SSH/云传输。
+
+生成时目标未知为 null；发送只在 incoming 副本补全目标，outgoing 不变。目标已指定为另一项目时拒绝。传递保留正文、状态和内容日期，不自动复制附件、执行正文或删除源文件。组合发送失败仍保留 outgoing，可单独 send 重试。
 
 ## 安装与分发
 
-将整个 `skills/session-handoff/` 目录复制到目标 agent 支持的技能目录，保留内部相对结构；具体发现路径由目标 agent 决定。没有技能发现机制时，直接引用该目录的 SKILL.md。无需部署服务、配置 API 或安装 Node.js 才能使用 skill。
+将整个 `skills/session-handoff/` 目录复制到目标 agent 支持的技能目录，保留内部相对结构；具体发现路径由目标 agent 决定。没有技能发现机制时，直接引用 SKILL.md。纯指令使用无需 Node.js；运行收发脚本时在副本目录执行 `npm ci --ignore-scripts --no-fund --no-audit`，依赖锁定在副本的 package-lock.json，不依赖仓库 tools/。
 
 修改时以本仓库为唯一源码，安装目录仅作副本；更新前比较差异、保留目标旧版本，再同步已审阅的 skill 文件。本仓库没有自动安装或覆盖脚本。
 
-分发时包含 skill 目录以及根目录 [LICENSE](LICENSE)，保留 MIT 版权与许可说明。无需分发 node_modules、OpenSpec、开发工具或本地交接材料。本项目本次仅完成本地实现，尚未发布远端或安装全局副本。
+分发时包含 skill 目录以及根目录 [LICENSE](LICENSE)，保留 MIT 版权与许可说明。无需分发 node_modules、OpenSpec、开发工具或真实交接材料。初版已发布到 GitHub；本次完善不自动推送或安装全局副本。
 
 ## 输出格式
 
 每份文档以 YAML 1.2 front matter 开始，字段定义见 [元信息契约](skills/session-handoff/references/metadata.md)，骨架见 [模板](skills/session-handoff/assets/handoff-template.md)。模板需填充、转义并裁剪，不能直接当成完整交接。
 
-必需字段为 `title`、`type`、`schema_version`、`created`、`updated`、`status`、`tags`、`language`、`source_agent`、`source_workspace`、`target_workspace`。未知来源或工作空间写 `null`；日期和版本用带引号的字符串；更新保留 `created`。状态不是授权。
+基础必需字段为 `title`、`type`、`schema_version`、`created`、`updated`、`status`、`tags`、`language`、`source_agent`、`source_workspace`、`target_workspace`。未知来源或工作空间写 null，日期和版本用带引号字符串。新文档还包含 `handoff_id`、`created_at`、`source_project`、`topic`，用于命名与传递；旧文档缺少整组路由字段仍兼容。状态不是授权。
 
-完整输出例子：[普通交接](evals/outputs/ordinary.md)、[英语子任务](evals/outputs/subtask.md)、[失败与材料缺失](evals/outputs/blocked.md)、[更新交接](evals/outputs/revised.md)。这些都是合成资料，不能当作真实项目状态。
+输出例子：[新命名与路由](evals/outputs/20261021T020304005Z__sample-project__分页-修复__a1234567.md)；旧格式兼容例子：[普通交接](evals/outputs/ordinary.md)、[英语子任务](evals/outputs/subtask.md)、[失败与材料缺失](evals/outputs/blocked.md)、[更新交接](evals/outputs/revised.md)。均为合成资料。
 
 ## 本地开发与验证
 
-开发校验需要 Node.js 22 或更新版本及 npm；skill 使用无此依赖。在仓库根目录运行：
+开发与脚本需要 Node.js 22+ 及 npm。在仓库根目录运行：
 
 ```sh
 npm ci
@@ -43,16 +95,16 @@ node tools/validate-handoff.mjs path/to/handoff.md
 node tools/validate-handoff.mjs path/to/revised.md --previous path/to/original.md
 ```
 
-校验 CLI 不修改文件，成功退出码为 0，文档无效或读失败为 1，参数错误为 2。输出只包含路径与错误类别，不回显正文或 YAML 输入值。可选原版参数仅接受一个修订文件。带扩展字段的文档仍可校验，扩展字段业务含义不在检查范围。
+校验 CLI 不修改文件，成功为 0，文档无效或读失败为 1，参数错误为 2，不回显正文或 YAML 输入值。原版参数仅接受单修订文件。实现已移入 skill/scripts，tools/ 入口保留兼容。路由字段出现任一项时必须整组有效；其他扩展业务含义不检查。
 
 安装了 OpenSpec CLI 的开发环境还可运行：
 
 ```sh
-openspec validate add-session-handoff-skill --strict --no-interactive
-openspec status --change add-session-handoff-skill
+openspec validate --all --strict --no-interactive
+openspec status --change add-project-handoff-routing
 ```
 
-有 skill-creator 的环境可运行其 `quick_validate.py skills/session-handoff`；它只做技能结构检查。合成场景、参考输出与审阅方法见 [evals/cases.md](evals/cases.md) 和 [验证记录](docs/validation.md)。本地原始会话应放在已忽略的 handoffs/ 或 .local/，不要混入公开案例。
+有 skill-creator 的环境可运行其 `quick_validate.py skills/session-handoff`；它只做结构检查。原合成场景见 [evals/cases.md](evals/cases.md)，本次脚本测试与演练见[验证记录](docs/routing-validation.md)。真实会话放在 handoff/ 或 .local/，不要混入公开案例。
 
 ## 限制
 

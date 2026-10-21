@@ -1,6 +1,6 @@
 {
   "name": "session-handoff",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Development checks for the portable session-handoff skill",
   "license": "MIT",
@@ -10,7 +10,7 @@
   },
   "scripts": {
     "test": "node --test",
-    "validate:examples": "node tools/validate-handoff.mjs evals/outputs/ordinary.md evals/outputs/subtask.md evals/outputs/blocked.md evals/outputs/revised.md"
+    "validate:examples": "node tools/validate-handoff.mjs evals/outputs/ordinary.md evals/outputs/subtask.md evals/outputs/blocked.md evals/outputs/revised.md evals/outputs/20261021T020304005Z__sample-project__分页-修复__a1234567.md"
   },
   "devDependencies": {
     "yaml": "2.9.1"
