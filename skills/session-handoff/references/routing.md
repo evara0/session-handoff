@@ -15,11 +15,11 @@ project/
 
 ```text
 YYYYMMDDTHHmmssSSSZ__<source>__<topic>__<id8>.md
-20261021T020304005Z__sample-project__分页-修复__a1234567.md
+20261021T020304005Z__sample-project__pagination-fix__a1234567.md
 ```
 
 - 时间来自创建身份时的真实时钟，为 UTC 毫秒（Z）。文档 created/updated 使用执行环境本地日期。
-- source 默认项目目录名，可用 --source-name 指定；topic 必须显式提供。二者先 NFKC 规范化、转小写，空格及下划线转连字符；只允许 Unicode 字母、数字和单个连字符，保留中文。最多分别 32、48 个 Unicode 字符；过长或含路径分隔符等非法字符时拒绝，需使用更短简称。
+- source 默认项目目录名，可用 --source-name 指定；topic 必须显式提供。二者先 NFKC 规范化、转小写，空格及下划线转连字符；规范化后只允许 ASCII 小写英文字母 a-z、数字 0-9 和单个连字符，最多分别 32、48 字符。文件名不得含中文或其他非 ASCII 字符；中文项目目录必须显式提供英文 --source-name，主题使用英文 --topic。不自动音译或删除中文；非法或过长输入被拒绝。标题、正文及真实工作空间路径仍可中文。
 - id8 为随机 UUID v4 的前八个十六进制字符，完整 UUID 存入 handoff_id。即使同一毫秒、项目和主题相同也可区分；极少数文件名冲突只会报错，不覆盖。
 - 身份与文件名不含目标和收发方向，传递时保留。接收脚本可按元信息恢复被下载工具改动的文件名。
 - 未发送的 outgoing 可原地修订并保留 created、created_at、handoff_id 和名称，按实际日期更新 updated。已经投递后再次修订使用新的生成身份；正文写明前版 ID。同名不同内容拒绝覆盖，不用 -2、时间后缀或改接收文件绕过冲突。
@@ -56,7 +56,7 @@ $bodyFile = 'G:\example-source\.local\handoff-body.md'
 
 ```powershell
 node "$scriptDir/init-handoff.mjs" --project "$sourceProject"
-node "$scriptDir/create-handoff.mjs" --project "$sourceProject" --title '分页修复交接' --topic '分页-修复' --status in-progress --body-file "$bodyFile"
+node "$scriptDir/create-handoff.mjs" --project "$sourceProject" --title '分页修复交接' --topic pagination-fix --status in-progress --body-file "$bodyFile"
 ```
 
 create 返回 file，为新文档的 outgoing 路径。初始化不是必需前置动作，create 和实际投递会按需创建双方存储目录。只生成不触碰目标；即使指定 --target，只要没有 --send 也仅在元信息记录目标。
@@ -64,7 +64,7 @@ create 返回 file，为新文档的 outgoing 路径。初始化不是必需前�
 ### 生成并直接投递
 
 ```powershell
-node "$scriptDir/create-handoff.mjs" --project "$sourceProject" --title '分页修复交接' --topic '分页-修复' --status in-progress --body-file "$bodyFile" --target "$targetProject" --send
+node "$scriptDir/create-handoff.mjs" --project "$sourceProject" --title '分页修复交接' --topic pagination-fix --status in-progress --body-file "$bodyFile" --target "$targetProject" --send
 ```
 
 已明确授权投递时才使用 --send。加 --dry-run 只预览，不创建目录或文档；预览中的 UUID/名称仅为计划，正式执行会重新生成，不预留文件名。

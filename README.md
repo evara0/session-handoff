@@ -28,10 +28,10 @@ project/
 
 ```text
 YYYYMMDDTHHmmssSSSZ__<source>__<topic>__<id8>.md
-20261021T020304005Z__sample-project__分页-修复__a1234567.md
+20261021T020304005Z__sample-project__pagination-fix__a1234567.md
 ```
 
-UTC 毫秒时间＋来源项目＋主题＋UUID 前八位。来源和主题支持中文，转小写，空格与下划线转连字符；长度最多 32/48 个 Unicode 字符。传递保留身份与名称。同名同内容幂等成功，不同内容报冲突，不覆盖；已发送文档的修订使用新身份。详见[收发与命名规范](skills/session-handoff/references/routing.md)。
+UTC 毫秒时间＋来源项目英文简称＋英文主题＋UUID 前八位，整个文件名只用 ASCII 字符。来源和主题只允许小写英文字母 a-z、数字 0-9 及连字符，转小写，空格与下划线转连字符；长度最多 32/48 字符。中文项目目录需显式传入英文 --source-name，中文命名参数会被拒绝，不自动音译；标题、正文和工作空间路径仍可中文。传递保留身份与名称，同名同内容幂等、不同内容不覆盖；已发送后的修订用新身份。详见[收发与命名规范](skills/session-handoff/references/routing.md)。
 
 旧 handoffs/ 不会自动搬迁；旧格式仍可校验或通过 receive 显式导入。真实交接建议排除 Git，本仓库已忽略 /handoff/。
 
@@ -49,10 +49,10 @@ $bodyFile = 'G:\example-source\.local\handoff-body.md'
 node "$scriptDir/init-handoff.mjs" --project "$sourceProject"
 
 # 只生成；body-file 是不含 front matter 的 Markdown 正文
-node "$scriptDir/create-handoff.mjs" --project "$sourceProject" --title '分页修复交接' --topic '分页-修复' --status in-progress --body-file "$bodyFile"
+node "$scriptDir/create-handoff.mjs" --project "$sourceProject" --title '分页修复交接' --topic pagination-fix --status in-progress --body-file "$bodyFile"
 
 # 生成后立即发送
-node "$scriptDir/create-handoff.mjs" --project "$sourceProject" --title '分页修复交接' --topic '分页-修复' --status in-progress --body-file "$bodyFile" --target "$targetProject" --send
+node "$scriptDir/create-handoff.mjs" --project "$sourceProject" --title '分页修复交接' --topic pagination-fix --status in-progress --body-file "$bodyFile" --target "$targetProject" --send
 
 # 稍后发送 create 返回的 file；先预览，可去掉 --dry-run 正式发送
 $outgoingFile = '替换为 create 返回的实际 file 路径'
@@ -81,7 +81,7 @@ init/create/send/receive 支持 --dry-run，不创建目录或文件。完整参
 
 基础必需字段为 `title`、`type`、`schema_version`、`created`、`updated`、`status`、`tags`、`language`、`source_agent`、`source_workspace`、`target_workspace`。未知来源或工作空间写 null，日期和版本用带引号字符串。新文档还包含 `handoff_id`、`created_at`、`source_project`、`topic`，用于命名与传递；旧文档缺少整组路由字段仍兼容。状态不是授权。
 
-输出例子：[新命名与路由](evals/outputs/20261021T020304005Z__sample-project__分页-修复__a1234567.md)；旧格式兼容例子：[普通交接](evals/outputs/ordinary.md)、[英语子任务](evals/outputs/subtask.md)、[失败与材料缺失](evals/outputs/blocked.md)、[更新交接](evals/outputs/revised.md)。均为合成资料。
+输出例子：[新命名与路由](evals/outputs/20261021T020304005Z__sample-project__pagination-fix__a1234567.md)；旧格式兼容例子：[普通交接](evals/outputs/ordinary.md)、[英语子任务](evals/outputs/subtask.md)、[失败与材料缺失](evals/outputs/blocked.md)、[更新交接](evals/outputs/revised.md)。均为合成资料。
 
 ## 本地开发与验证
 

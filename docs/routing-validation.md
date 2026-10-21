@@ -4,14 +4,18 @@
 
 ## 自动验证
 
-- `npm test`：53 项测试，包含旧版 34 项回归及新增收发、命名和分发约束。
+- `npm test`：55 项测试，包含旧版 34 项回归及新增收发、命名和分发约束。
 - `npm run validate:examples`：旧格式四份参考输出及新路由命名示例共五份通过。
 - `openspec validate --all --strict --no-interactive`：检查主规范、旧变更和本次变更；未自动归档。
 - skill-creator `quick_validate.py skills/session-handoff`：技能结构检查，不代替行为验证。
 
-收发测试覆盖：双向目录幂等初始化、同毫秒不同身份、中文和非法命名、只生成不写目标、组合生成发送、未知目标仅在副本补全、重复投递幂等、冲突不覆盖、失败保留 outgoing、外部改名恢复、旧文档显式导入、路由字段完整性、修订身份保持、只读列表、dry-run、错误不回显输入、junction 拒绝及正文指令不执行。
+收发测试覆盖：双向目录幂等初始化、同毫秒不同身份、ASCII 命名、中文命名拒绝、中文项目通过英文别名生成且内容保留中文、只生成不写目标、组合生成发送、未知目标仅在副本补全、重复投递幂等、冲突不覆盖、失败保留 outgoing、外部改名恢复、旧文档显式导入、路由字段完整性、修订身份保持、只读列表、dry-run、错误不回显输入、junction 拒绝及正文指令不执行。
+
+按用户修订，已将 source_project/topic 及规范文件名限定为 ASCII，并同步校验、skill、命令示例和样例文件名。新增测试确认中文路由字段在 send/receive 写入目标前即失败；不修改已有真实交接，历史中文路由文档需显式重新生成合规身份后传递。没有路由字段的旧 v1.0 文档仍可通过 receive 配合英文 source-name/topic 导入。
 
 ## 独立副本演练
+
+本节记录 ASCII 命名修订前的独立依赖与收发演练；本次命名变更通过上面的 55 项回归检查，未重新安装依赖或向真实项目发送。
 
 仅复制 skills/session-handoff 到项目内已忽略的 `.local/routing-eval-31ec08bd/skill`，在副本目录执行 `npm ci --ignore-scripts --offline --no-fund --no-audit`，只安装一个 yaml 依赖，并确认解析路径位于副本自己的 node_modules。该演练不使用仓库 tools/。
 

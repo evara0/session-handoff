@@ -70,10 +70,14 @@ function localDate(now) {
 }
 
 function identity(source, topic, now) {
-  try {
-    return { handoff_id: randomUUID(), created_at: now.toISOString(),
-      source_project: slug(source, 32), topic: slug(topic, 48) };
-  } catch { fail('name.invalid'); }
+  let sourceProject;
+  let topicSlug;
+  try { sourceProject = slug(source, 32); }
+  catch { fail('source_name.invalid'); }
+  try { topicSlug = slug(topic, 48); }
+  catch { fail('topic.invalid'); }
+  return { handoff_id: randomUUID(), created_at: now.toISOString(),
+    source_project: sourceProject, topic: topicSlug };
 }
 
 function quoteStrings(document) {

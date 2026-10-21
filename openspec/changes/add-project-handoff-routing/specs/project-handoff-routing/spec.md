@@ -18,11 +18,15 @@
 
 ### Requirement: Stable portable filename
 
-新文档 MUST 使用 `YYYYMMDDTHHmmssSSSZ__<source>__<topic>__<id8>.md`，时间为 UTC 毫秒，source/topic 为小写 Unicode 字母、数字和连字符且最多 32/48 字符，id8 为完整 UUID 的前八个十六进制字符。MUST 保存 handoff_id、created_at、source_project、topic，文件名与元信息一致。传递 SHALL 保留身份和名称。
+新文档 MUST 使用 `YYYYMMDDTHHmmssSSSZ__<source>__<topic>__<id8>.md`，时间为 UTC 毫秒，source/topic 只允许 ASCII 小写英文字母 a-z、数字 0-9 和连字符且最多 32/48 字符，id8 为完整 UUID 的前八个十六进制字符。文件名 MUST 不含中文或其他非 ASCII 字符；标题、正文及工作空间路径可含中文。MUST 保存 handoff_id、created_at、source_project、topic，文件名与元信息一致。传递 SHALL 保留身份和名称。
 
-#### Scenario: Concurrent generation with a Chinese topic
-- **WHEN** 同一毫秒生成同项目同主题的两份文档
-- **THEN** 两文档通过不同 UUID 区分且不覆盖；中文主题保留，名称无路径分隔符或 Windows 非法字符
+#### Scenario: Concurrent generation with ASCII slugs
+- **WHEN** 同一毫秒使用英文来源简称和主题生成两份文档
+- **THEN** 两文档通过不同 UUID 区分且不覆盖，文件名只含 ASCII 字符
+
+#### Scenario: Chinese project or naming input
+- **WHEN** 项目目录含中文，或用户提供含中文的来源简称或主题
+- **THEN** 中文项目可用显式 ASCII source-name 生成交接；中文命名输入被拒绝，不写文件、不自动音译，文档标题和正文仍可保留中文
 
 ### Requirement: Generate only or generate and send
 

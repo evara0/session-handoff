@@ -11,7 +11,7 @@
 ## Decisions
 
 1. **固定双向目录。** 以参数指定已存在项目根，解析实际路径；只在根下的 handoff/{incoming,outgoing} 存储。init 创建两个目录，list 不创建目录。拒绝 handoff 及两个子目录中的 symlink/junction，避免写出指定项目。项目根本身可用真实路径别名。
-2. **命名与身份。** `YYYYMMDDTHHmmssSSSZ__<source>__<topic>__<id8>.md`。时间为 UTC，source/topic 为规范化的小写 Unicode 字母、数字与连字符，分别最多 32/48 个字符；保留中文。额外元信息为 handoff_id（完整 UUID）、created_at（UTC 毫秒 ISO）、source_project、topic。传递保留身份和名字，已发送修订重新生成新 ID，旧收件不覆盖。基础 schema_version 仍为 '1.0'，没有路由字段的旧文档仍通过原校验。
+2. **命名与身份。** `YYYYMMDDTHHmmssSSSZ__<source>__<topic>__<id8>.md`。时间为 UTC，source/topic 规范化后只允许 ASCII 小写英文字母、数字与连字符，分别最多 32/48 个字符，不含中文。中文项目目录需显式 --source-name 英文简称；agent 根据交接主题选择英文 --topic，不自动音译或删除字符。标题、正文和真实工作空间路径不受此限制。额外元信息为 handoff_id（完整 UUID）、created_at（UTC 毫秒 ISO）、source_project、topic。传递保留身份和名字，已发送修订重新生成新 ID，旧收件不覆盖。基础 schema_version 仍为 '1.0'，没有路由字段的旧文档仍通过原校验。
 3. **Node.js 脚本加单个 yaml 依赖。** 放在 skill/scripts，skill 内附 package.json 和锁文件，安装副本可独立 npm ci。仓库 tools/validate-handoff.mjs 保留重导出兼容旧调用。替代 Python 方案会新增另一个运行时和环境约定，选择复用现有 Node.js。
 4. **生成与传递分开。** create 从 UTF-8 正文文件生成元信息和 outgoing；--send 要求 --target，可先预览再实际执行。send 只接受本项目 outgoing 的正规文档。receive 可接收外部文件；缺少路由身份的旧文档需显式 source-name/topic 后导入。正文由 agent 根据可见上下文撰写，脚本不生成事实或自动总结。
 5. **目标路由副本。** 生成时可指定目标，未知为 null。投递时仅当 target_workspace 为 null 才在收件副本写入实际目标；outgoing 原件不变。已指定不同目标时拒绝，避免误投。该字段表示投递目标，不改变 created/updated 或工作状态。正文描述生成时未定目标需注明时间语境。

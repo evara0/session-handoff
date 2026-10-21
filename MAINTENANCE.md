@@ -62,6 +62,7 @@ OpenSpec 检查运行 `openspec validate --all --strict --no-interactive`。技�
 
 - **格式失败：** 用 `node tools/validate-handoff.mjs <文件>` 取得固定错误类别，对照[字段契约](skills/session-handoff/references/metadata.md)。修订加 `--previous <原版>` 检查日期保留，不会写回文档。
 - **缺少 yaml 包：** 仓库开发在根目录运行 npm ci；安装副本在 skill 目录运行 npm ci。网络代理或 registry 异常先核对本机 npm 配置，仓库不保存代理和凭据。
+- **命名失败：** 文件名只用 ASCII；中文项目目录加英文 --source-name，主题使用英文 --topic，仅允许小写英文字母、数字及连字符。source_name.invalid/topic.invalid 表示对应简称不合规；标题与正文仍可中文。
 - **投递失败：** 先核对错误类别和目标目录。组合生成发送失败时从错误 JSON 的 outgoing 找回源文件，修正目标问题后单独 send 重试；file.conflict 不覆盖，应核查是否发送了同一身份的修改版。已投递后的修订生成新身份。
 - **目录链接被拒绝：** handoff 及 incoming/outgoing 不支持 symlink 或 junction，使用项目内实际目录，不绕过路径检查。
 - **语义错误：** 对照可见证据审阅事实、建议、状态、路径与授权；不要以格式通过证明交接正确。

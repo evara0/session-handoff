@@ -48,7 +48,7 @@ function fixture(t) {
   const bodyFile = join(root, 'body.md');
   writeFileSync(bodyFile, '# 合成交接\n\n只包含测试事实。生成时目标未定，以投递元信息为准。\n');
   const options = { project: source, bodyFile, title: "Contributor's handoff: 示例",
-    topic: '分页 修复', status: 'in-progress' };
+    sourceName: 'source-project', topic: 'Pagination Fix', status: 'in-progress' };
   return { root, source, target, bodyFile, options };
 }
 
@@ -68,16 +68,45 @@ test('init is idempotent and one project can receive and send', t => {
   assert.equal(listHandoffs({ project: source, direction: 'outgoing' }).files.length, 1);
 });
 
-test('filename carries UTC milliseconds, Chinese slugs and a unique stable identity', t => {
+test('filename carries UTC milliseconds, ASCII slugs and a unique stable identity', t => {
   const { options } = fixture(t);
   const first = createHandoff(options, clock);
   const second = createHandoff(options, clock);
   assert.notEqual(first.file, second.file);
-  assert.match(basename(first.file), /^20261021T020304005Z__来源项目__分页-修复__[0-9a-f]{8}\.md$/u);
+  assert.match(basename(first.file), /^20261021T020304005Z__source-project__pagination-fix__[0-9a-f]{8}\.md$/);
   assert.equal(basename(first.file), filename(metadata(first.file)));
   assert.equal(metadata(first.file).created_at, clock.toISOString());
   assert.deepEqual(validateHandoff(text(first.file)).errors, []);
   assert.equal(metadata(first.file).title, options.title);
+});
+
+test('Chinese project paths and content require ASCII naming aliases, never automatic transliteration', t => {
+  const { source, options } = fixture(t);
+  const withoutAlias = { ...options };
+  delete withoutAlias.sourceName;
+  assert.throws(() => createHandoff(withoutAlias, clock), /source_name.invalid/);
+  for (const change of [{ sourceName: '来源项目' }, { topic: '分页修复' }, { topic: 'café' }, { topic: 'export-导出' }]) {
+    assert.throws(() => createHandoff({ ...options, ...change }, clock));
+  }
+  assert.ok(!existsSync(join(source, 'handoff')));
+  const created = createHandoff(options, clock);
+  assert.match(basename(created.file), /^[\x00-\x7f]+$/);
+  assert.match(metadata(created.file).source_workspace, /来源项目/);
+  assert.match(metadata(created.file).title, /示例/);
+  assert.match(body(text(created.file)), /合成交接/);
+});
+
+test('send and receive reject non-ASCII routing fields before writing a destination', t => {
+  const { source, target, options } = fixture(t);
+  const created = createHandoff(options, clock);
+  const original = text(created.file);
+  for (const [key, value] of [['source_project', '来源项目'], ['topic', '分页-修复']]) {
+    writeFileSync(created.file, original.replace(new RegExp(`${key}:.*\\n`), `${key}: '${value}'\n`));
+    assert.ok(validateHandoff(text(created.file)).errors.includes(`routing.${key}`));
+    assert.throws(() => sendHandoff({ project: source, file: created.file, target }), /document.invalid/);
+    assert.throws(() => receiveHandoff({ project: target, file: created.file }), /document.invalid/);
+  }
+  assert.ok(!existsSync(join(target, 'handoff')));
 });
 
 test('create only leaves the target untouched even when it is recorded', t => {
@@ -278,7 +307,7 @@ test('CLI generates, sends and lists; argument errors fail without source value 
   for (const name of ['init-handoff', 'create-handoff', 'send-handoff', 'receive-handoff', 'list-handoffs']) {
     assert.equal(run(`${name}.mjs`, ['--help']).status, 0);
   }
-  const result = run('create-handoff.mjs', ['--project', source, '--title', options.title, '--topic', 'csv',
+  const result = run('create-handoff.mjs', ['--project', source, '--source-name', 'source-project', '--title', options.title, '--topic', 'csv',
     '--status', 'blocked', '--body-file', options.bodyFile, '--target', target, '--send']);
   assert.equal(result.status, 0, result.stderr);
   const created = JSON.parse(result.stdout);

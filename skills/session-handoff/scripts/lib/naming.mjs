@@ -1,6 +1,6 @@
 export const ROUTING_FIELDS = ['handoff_id', 'created_at', 'source_project', 'topic'];
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
-const SLUG = /^[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*$/u;
+const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export function slug(value, limit) {
   if (typeof value !== 'string') throw new Error('name.invalid');

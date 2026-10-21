@@ -14,7 +14,7 @@ target_workspace: null
 handoff_id: 'a1234567-89ab-4cde-8fab-0123456789ab'
 created_at: '2026-10-21T02:03:04.005Z'
 source_project: 'sample-project'
-topic: '分页-修复'
+topic: 'pagination-fix'
 ---
 
 # 分页修复交接（合成示例）
