@@ -73,7 +73,7 @@ init/create/send/receive 支持 --dry-run，不创建目录或文件。完整参
 
 修改时以本仓库为唯一源码，安装目录仅作副本；更新前比较差异、保留目标旧版本，再同步已审阅的 skill 文件。本仓库没有自动安装或覆盖脚本。
 
-分发时包含 skill 目录以及根目录 [LICENSE](LICENSE)，保留 MIT 版权与许可说明。无需分发 node_modules、OpenSpec、开发工具或真实交接材料。初版已发布到 GitHub；本次完善不自动推送或安装全局副本。
+分发时包含 skill 目录以及根目录 [LICENSE](LICENSE)，保留 MIT 版权与许可说明。无需分发 node_modules、OpenSpec、开发工具或真实交接材料。远端更新按用户授权推送，不自动安装全局副本。
 
 ## 输出格式
 
@@ -101,7 +101,8 @@ node tools/validate-handoff.mjs path/to/revised.md --previous path/to/original.m
 
 ```sh
 openspec validate --all --strict --no-interactive
-openspec status --change add-project-handoff-routing
+openspec validate --archived --strict --no-interactive
+openspec show project-handoff-routing --type spec
 ```
 
 有 skill-creator 的环境可运行其 `quick_validate.py skills/session-handoff`；它只做结构检查。原合成场景见 [evals/cases.md](evals/cases.md)，本次脚本测试与演练见[验证记录](docs/routing-validation.md)。真实会话放在 handoff/ 或 .local/，不要混入公开案例。

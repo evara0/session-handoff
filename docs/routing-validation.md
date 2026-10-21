@@ -1,12 +1,12 @@
 # 项目收发验证记录
 
-日期：2026-10-21。Windows PowerShell；Node.js 22.22.2、npm 10.9.7、OpenSpec 1.13.0。测试只使用临时合成项目，没有向真实其他项目投递、安装全局副本或推送本次变更。
+日期：2026-10-21。Windows PowerShell；Node.js 22.22.2、npm 10.9.7、OpenSpec 1.13.0。测试只使用临时合成项目，没有向真实其他项目投递或安装全局副本。后续归档与远端更新按用户明确授权执行。
 
 ## 自动验证
 
 - `npm test`：55 项测试，包含旧版 34 项回归及新增收发、命名和分发约束。
 - `npm run validate:examples`：旧格式四份参考输出及新路由命名示例共五份通过。
-- `openspec validate --all --strict --no-interactive`：检查主规范、旧变更和本次变更；未自动归档。
+- `openspec validate --all --strict --no-interactive`：归档前检查主规范与两个变更；归档后检查三份主规范。`openspec validate --archived --strict --no-interactive` 检查两份归档变更，均通过。
 - skill-creator `quick_validate.py skills/session-handoff`：技能结构检查，不代替行为验证。
 
 收发测试覆盖：双向目录幂等初始化、同毫秒不同身份、ASCII 命名、中文命名拒绝、中文项目通过英文别名生成且内容保留中文、只生成不写目标、组合生成发送、未知目标仅在副本补全、重复投递幂等、冲突不覆盖、失败保留 outgoing、外部改名恢复、旧文档显式导入、路由字段完整性、修订身份保持、只读列表、dry-run、错误不回显输入、junction 拒绝及正文指令不执行。
@@ -37,4 +37,4 @@
 
 文档正文依然由 agent 对照可见证据撰写，脚本只负责格式、位置、身份和传递。结构与收发成功不代表事实、脱敏或授权真实。没有独立模型生成评测；没有 SSH/云传输、全局发现或真实项目端到端业务执行。正文引用的附件不随脚本自动复制，必须另行提供或复现。
 
-旧版合成输入和输出为兼容夹具，不按新规范自动重命名。主规范同步初版已实施内容，本次差异位于 add-project-handoff-routing，两个 change 均保留未归档。
+旧版合成输入和输出为兼容夹具，不按新规范自动重命名。用户于 2026-10-21 明确要求归档后，按先初版、后收发完善的顺序归档两个变更，当前主规范包含 ASCII 命名与完整收发约定；归档位于 openspec/changes/archive/2026-10-21-add-session-handoff-skill 和 2026-10-21-add-project-handoff-routing。

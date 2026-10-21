@@ -2,7 +2,7 @@
 title: 'session-handoff · 项目维护卡'
 project: session-handoff
 updated: '2026-10-21'
-status: 'v1.1 本地测试与独立副本收发演练；初版已推送，本次未推送或全局安装'
+status: 'v1.1 本地测试与独立副本收发演练通过，两个变更已归档；未全局安装'
 environments:
   - 'local-windows'
 ---
@@ -21,7 +21,7 @@ environments:
 | 技能 | `skills/session-handoff/SKILL.md`，引用同目录 references、assets 和 scripts |
 | 脚本与开发工具 | Node.js 22+、npm、YAML 2.9.1；仓库和 skill 内均有锁文件，副本可独立安装 |
 | 测试与样例 | `test/`、`evals/`；全部为合成输入和参考输出 |
-| 规范 | `openspec/specs/` 为初版基线；当前变更 `add-project-handoff-routing`，旧 change 保留不归档 |
+| 规范 | `openspec/specs/` 为当前规范；两个已完成变更归档于 `openspec/changes/archive/2026-10-21-*` |
 
 ## 本地怎么运行
 
@@ -56,7 +56,7 @@ OpenSpec 检查运行 `openspec validate --all --strict --no-interactive`。技�
 
 ## 本地更新与分发
 
-修改前记录 Git 状态并保留未提交工作，先更新 OpenSpec change，再修改与验证。无需构建。分发完整 skill 目录（包括其脚本、清单和锁文件）及根 LICENSE，目标已有版本先比较差异并保留旧副本。初版 9ca18d6 曾推送至 https://github.com/evara0/session-handoff；本次完善没有自动推送或全局安装。
+修改前记录 Git 状态并保留未提交工作，先创建相应 OpenSpec change，再修改与验证。无需构建。分发完整 skill 目录（包括其脚本、清单和锁文件）及根 LICENSE，目标已有版本先比较差异并保留旧副本。GitHub 远端为 [evara0/session-handoff](https://github.com/evara0/session-handoff)，在用户明确授权后提交并使用 `git push origin main` 更新；全局副本不自动安装。
 
 ## 出问题先做什么
 
